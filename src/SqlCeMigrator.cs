@@ -10,7 +10,7 @@ namespace ErikEJ.SqlCeMigrator
 {
     public class SqlCeMigrator
     {
-        public bool TryImport(string localDbPath, string[] tablesToIgnore, string targetConnectionString, string[] tablesToClear, bool renameSource)
+        public bool TryImport(string localDbPath, string[] tablesToIgnore, string targetConnectionString, string[] tablesToClear, bool renameSource, int scopeValue)
         {
             if (string.IsNullOrEmpty(localDbPath))
             {
@@ -33,6 +33,8 @@ namespace ErikEJ.SqlCeMigrator
                 Console.WriteLine("Block.txt found, will stop migration");
                 return false;
             }
+
+            var scope = GetScope(scopeValue);
 
             if (!ValidateTargetConnection(targetConnectionString, localDbPath))
             {
@@ -79,6 +81,31 @@ namespace ErikEJ.SqlCeMigrator
             }
             if (renameSource) RenameLocalDb(localDbPath);
             return true;
+        }
+
+        private Scope GetScope(int scopeValue)
+        {
+            //0 = Scope.DataOnlyForSqlServer,
+            //1 = Scope.Schema,
+            //2 = Scope.SchemaData
+
+            var scope = Scope.Schema;
+            switch (scopeValue)
+            {
+                case 0:
+                    scope = Scope.DataOnlyForSqlServer;
+                    break;
+                case 1:
+                    scope = Scope.Schema;
+                    break;
+                case 2:
+                    scope = Scope.SchemaData;
+                    break;
+
+                default:
+                    throw new Exception("Invalid scope value");
+            }
+            return scope;
         }
 
         private bool ValidateTargetConnection(string targetConnectionString, string localDbPath)
