@@ -12,7 +12,7 @@ namespace ErikEJ.SqlCeMigrator
             var renameLocalDb = false;
             bool.TryParse(ConfigurationManager.AppSettings["RenameSqlCeDatabase"], out renameLocalDb);
 
-            var scopeValue = 0;
+            var scopeValue = -1;
             int.TryParse(ConfigurationManager.AppSettings["Scope"], out scopeValue);
 
             var ignoreTableString = ConfigurationManager.AppSettings["SqlCeTablesToIgnore"];
@@ -20,6 +20,13 @@ namespace ErikEJ.SqlCeMigrator
             if (!string.IsNullOrWhiteSpace(ignoreTableString))
             {
                 tablesToIgnore = ignoreTableString.Split(',');
+            }
+
+            var appendTableString = ConfigurationManager.AppSettings["SqlCeTablesToAppend"];
+            string[] tablesToAppend = new string[0];
+            if (!string.IsNullOrWhiteSpace(appendTableString))
+            {
+                tablesToAppend = appendTableString.Split(',');
             }
 
             var clearTableString = ConfigurationManager.AppSettings["SqlServerTablesToClear"];
@@ -35,7 +42,7 @@ namespace ErikEJ.SqlCeMigrator
 
             try
             {
-                if (!sqlCeMigrator.TryImport(localDbPath, tablesToIgnore, targetConnectionString, tablesToClear, renameLocalDb, scopeValue))
+                if (!sqlCeMigrator.TryImport(localDbPath, tablesToIgnore, tablesToAppend, targetConnectionString, tablesToClear, renameLocalDb, scopeValue))
                 {
                     Console.WriteLine("Migration failed, please review the SQL Compact database folder for block.txt");
                     Environment.Exit(1);
