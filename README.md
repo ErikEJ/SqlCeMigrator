@@ -3,7 +3,7 @@ Command line tool to move your SQL Server Compact database to SQL Server
 
 Configured via the App.Config file:
 
-```
+```xml
 <?xml version="1.0" encoding="utf-8" ?>
 <configuration>
   <appSettings>
