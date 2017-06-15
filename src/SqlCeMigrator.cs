@@ -10,7 +10,7 @@ namespace ErikEJ.SqlCeMigrator
 {
     public class SqlCeMigrator
     {
-        public bool TryImport(string localDbPath, string[] tablesToIgnore, string targetConnectionString, string[] tablesToClear, bool renameSource, int scopeValue)
+        public bool TryImport(string localDbPath, string[] tablesToIgnore, string[] tablesToAppend, string targetConnectionString, string[] tablesToClear, bool renameSource, int scopeValue)
         {
             if (string.IsNullOrEmpty(localDbPath))
             {
@@ -43,13 +43,38 @@ namespace ErikEJ.SqlCeMigrator
 
             ClearTargetTables(targetConnectionString, tablesToClear, localDbPath);
 
+            RunMigration(localDbPath, tablesToIgnore, targetConnectionString, scope);
+
+            if (scope == Scope.DataOnlyForSqlServer && tablesToAppend.Length > 0)
+            {
+                RunMigration(localDbPath, tablesToAppend, targetConnectionString, Scope.DataOnlyForSqlServerIgnoreIdentity);
+            }
+
+            if (renameSource) RenameLocalDb(localDbPath);
+            return true;
+        }
+
+        private void RunMigration(string localDbPath, string[] tablesToIgnoreOrAppend, string targetConnectionString, Scope scope)
+        {
             using (var repository = new DB4Repository($"Data Source={localDbPath};Max Database Size=4000"))
             {
                 var scriptRoot = Path.GetTempFileName();
                 var tempScript = scriptRoot + ".sqltb";
                 var generator = new Generator4(repository, tempScript);
-                generator.ExcludeTables(tablesToIgnore.ToList());
-                generator.ScriptDatabaseToFile(Scope.DataOnlyForSqlServer);
+
+                if (scope == Scope.DataOnlyForSqlServerIgnoreIdentity)
+                {
+                    //Ignore all tables except the ones in tablesToAppend
+                    var tables = repository.GetAllTableNames();
+                    var list = tables.Except(tablesToIgnoreOrAppend.ToList());
+                    generator.ExcludeTables(list.ToList());
+                }
+                else
+                {
+                    generator.ExcludeTables(tablesToIgnoreOrAppend.ToList());
+                }
+
+                generator.ScriptDatabaseToFile(scope);
                 using (var serverRepository = new ServerDBRepository4(targetConnectionString))
                 {
                     try
@@ -58,6 +83,7 @@ namespace ErikEJ.SqlCeMigrator
                         if (File.Exists(tempScript)) // Single file
                         {
                             serverRepository.ExecuteSqlFile(tempScript);
+                            TryDeleteFile(tempScript);
                         }
                         else // possibly multiple files - tmp2BB9.tmp_0.sqlce
                         {
@@ -79,16 +105,10 @@ namespace ErikEJ.SqlCeMigrator
                     }
                 }
             }
-            if (renameSource) RenameLocalDb(localDbPath);
-            return true;
         }
 
         private Scope GetScope(int scopeValue)
         {
-            //0 = Scope.DataOnlyForSqlServer,
-            //1 = Scope.Schema,
-            //2 = Scope.SchemaData
-
             var scope = Scope.Schema;
             switch (scopeValue)
             {
@@ -139,7 +159,7 @@ namespace ErikEJ.SqlCeMigrator
 
                     foreach (var table in tablesToClear)
                     {
-                        using (var command = new SqlCommand(string.Format("DELETE FROM [{0}]", table), connection))
+                        using (var command = new SqlCommand(string.Format("DELETE FROM {0}", table), connection))
                         {
                             var result = command.ExecuteNonQuery();
                         }
