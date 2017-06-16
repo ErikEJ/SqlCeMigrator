@@ -10,7 +10,7 @@ namespace ErikEJ.SqlCeMigrator
 {
     public class SqlCeMigrator
     {
-        public bool TryImport(string localDbPath, string[] tablesToIgnore, string[] tablesToAppend, string targetConnectionString, string[] tablesToClear, bool renameSource, int scopeValue)
+        public bool TryImport(string localDbPath, string[] tablesToIgnore, string[] tablesToAppend, string targetConnectionString, string[] tablesToClear, bool renameSource, bool removeTempFiles, int scopeValue)
         {
             if (string.IsNullOrEmpty(localDbPath))
             {
@@ -43,18 +43,18 @@ namespace ErikEJ.SqlCeMigrator
 
             ClearTargetTables(targetConnectionString, tablesToClear, localDbPath);
 
-            RunMigration(localDbPath, tablesToIgnore, targetConnectionString, scope);
+            RunMigration(localDbPath, tablesToIgnore, targetConnectionString, scope, removeTempFiles);
 
             if (scope == Scope.DataOnlyForSqlServer && tablesToAppend.Length > 0)
             {
-                RunMigration(localDbPath, tablesToAppend, targetConnectionString, Scope.DataOnlyForSqlServerIgnoreIdentity);
+                RunMigration(localDbPath, tablesToAppend, targetConnectionString, Scope.DataOnlyForSqlServerIgnoreIdentity, removeTempFiles);
             }
 
             if (renameSource) RenameLocalDb(localDbPath);
             return true;
         }
 
-        private void RunMigration(string localDbPath, string[] tablesToIgnoreOrAppend, string targetConnectionString, Scope scope)
+        private void RunMigration(string localDbPath, string[] tablesToIgnoreOrAppend, string targetConnectionString, Scope scope, bool removeTempFiles)
         {
             using (var repository = new DB4Repository($"Data Source={localDbPath};Max Database Size=4000"))
             {
@@ -83,7 +83,7 @@ namespace ErikEJ.SqlCeMigrator
                         if (File.Exists(tempScript)) // Single file
                         {
                             serverRepository.ExecuteSqlFile(tempScript);
-                            TryDeleteFile(tempScript);
+                            if (removeTempFiles) TryDeleteFile(tempScript);
                         }
                         else // possibly multiple files - tmp2BB9.tmp_0.sqlce
                         {
@@ -93,7 +93,7 @@ namespace ErikEJ.SqlCeMigrator
                                 if (File.Exists(testFile))
                                 {
                                     serverRepository.ExecuteSqlFile(testFile);
-                                    TryDeleteFile(testFile);
+                                    if (removeTempFiles) TryDeleteFile(testFile);
                                 }
                             }
                         }
