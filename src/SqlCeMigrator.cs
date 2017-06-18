@@ -43,8 +43,12 @@ namespace ErikEJ.SqlCeMigrator
 
             ClearTargetTables(targetConnectionString, tablesToClear, localDbPath);
 
-            RunMigration(localDbPath, tablesToIgnore, targetConnectionString, scope, removeTempFiles);
-
+            // Ignore the tables that should be ignored OR that we will be appending to later
+            string[] combined = new string[tablesToIgnore.Length + tablesToAppend.Length];
+            Array.Copy(tablesToIgnore, combined, tablesToIgnore.Length);
+            Array.Copy(tablesToAppend, 0, combined, tablesToIgnore.Length, tablesToAppend.Length);
+            RunMigration(localDbPath, combined, targetConnectionString, scope, removeTempFiles);
+            
             if (scope == Scope.DataOnlyForSqlServer && tablesToAppend.Length > 0)
             {
                 RunMigration(localDbPath, tablesToAppend, targetConnectionString, Scope.DataOnlyForSqlServerIgnoreIdentity, removeTempFiles);
