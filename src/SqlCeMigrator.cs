@@ -5,12 +5,13 @@ using System.Linq;
 using System.Text;
 
 using ErikEJ.SqlCeScripting;
+using System.Collections.Generic;
 
 namespace ErikEJ.SqlCeMigrator
 {
     public class SqlCeMigrator
     {
-        public bool TryImport(string localDbPath, string[] tablesToIgnore, string[] tablesToAppend, string targetConnectionString, string[] tablesToClear, bool renameSource, bool removeTempFiles, int scopeValue)
+        public bool TryImport(string localDbPath, List<string> tablesToIgnore, List<string> tablesToAppend, string targetConnectionString, List<string> tablesToClear, bool renameSource, bool removeTempFiles, int scopeValue)
         {
             if (string.IsNullOrEmpty(localDbPath))
             {
@@ -43,13 +44,11 @@ namespace ErikEJ.SqlCeMigrator
 
             ClearTargetTables(targetConnectionString, tablesToClear, localDbPath);
 
-            // Ignore the tables that should be ignored OR that we will be appending to later
-            string[] combined = new string[tablesToIgnore.Length + tablesToAppend.Length];
-            Array.Copy(tablesToIgnore, combined, tablesToIgnore.Length);
-            Array.Copy(tablesToAppend, 0, combined, tablesToIgnore.Length, tablesToAppend.Length);
-            RunMigration(localDbPath, combined, targetConnectionString, scope, removeTempFiles);
+            // Ignore the tables that should be ignored AND that we will be appending to later
+            tablesToIgnore.Union(tablesToAppend);
+            RunMigration(localDbPath, tablesToIgnore, targetConnectionString, scope, removeTempFiles);
             
-            if (scope == Scope.DataOnlyForSqlServer && tablesToAppend.Length > 0)
+            if (scope == Scope.DataOnlyForSqlServer && tablesToAppend.Count > 0)
             {
                 RunMigration(localDbPath, tablesToAppend, targetConnectionString, Scope.DataOnlyForSqlServerIgnoreIdentity, removeTempFiles);
             }
@@ -58,7 +57,7 @@ namespace ErikEJ.SqlCeMigrator
             return true;
         }
 
-        private void RunMigration(string localDbPath, string[] tablesToIgnoreOrAppend, string targetConnectionString, Scope scope, bool removeTempFiles)
+        private void RunMigration(string localDbPath, List<string> tablesToIgnoreOrAppend, string targetConnectionString, Scope scope, bool removeTempFiles)
         {
             using (var repository = new DB4Repository($"Data Source={localDbPath};Max Database Size=4000"))
             {
@@ -70,8 +69,8 @@ namespace ErikEJ.SqlCeMigrator
                 {
                     //Ignore all tables except the ones in tablesToAppend
                     var tables = repository.GetAllTableNames();
-                    var list = tables.Except(tablesToIgnoreOrAppend.ToList());
-                    generator.ExcludeTables(list.ToList());
+                    var list = tables.Except(tablesToIgnoreOrAppend).ToList();
+                    generator.ExcludeTables(list);
                 }
                 else
                 {
@@ -153,7 +152,7 @@ namespace ErikEJ.SqlCeMigrator
             }
         }
 
-        private void ClearTargetTables(string targetConnectionString, string[] tablesToClear, string localDbPath)
+        private void ClearTargetTables(string targetConnectionString, List<string> tablesToClear, string localDbPath)
         {
             try
             {

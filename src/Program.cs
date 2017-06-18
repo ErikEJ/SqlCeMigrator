@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Configuration;
 
 namespace ErikEJ.SqlCeMigrator
@@ -19,24 +20,24 @@ namespace ErikEJ.SqlCeMigrator
             int.TryParse(ConfigurationManager.AppSettings["Scope"], out scopeValue);
 
             var ignoreTableString = ConfigurationManager.AppSettings["SqlCeTablesToIgnore"];
-            string[] tablesToIgnore = new string[0];
+            var tablesToIgnore = new List<string>();
             if (!string.IsNullOrWhiteSpace(ignoreTableString))
             {
-                tablesToIgnore = ignoreTableString.Split(',');
+                tablesToIgnore.AddRange(ignoreTableString.Split(','));
             }
 
             var appendTableString = ConfigurationManager.AppSettings["SqlCeTablesToAppend"];
-            string[] tablesToAppend = new string[0];
+            var tablesToAppend = new List<string>();
             if (!string.IsNullOrWhiteSpace(appendTableString))
             {
-                tablesToAppend = appendTableString.Split(',');
+                tablesToAppend.AddRange(appendTableString.Split(','));
             }
 
             var clearTableString = ConfigurationManager.AppSettings["SqlServerTablesToClear"];
-            string[] tablesToClear = new string[0];
+            var tablesToClear = new List<string>();
             if (!string.IsNullOrWhiteSpace(clearTableString))
             {
-                tablesToClear = clearTableString.Split(',');
+                tablesToClear.AddRange(clearTableString.Split(','));
             }
 
             var targetConnectionString = ConfigurationManager.ConnectionStrings["SqlServer"].ConnectionString;
