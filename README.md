@@ -16,7 +16,10 @@ Configured via the App.Config file:
     
     <!-- If true, will rename the SQL Compact database file with date stamp -->
     <add key ="RenameSqlCeDatabase" value="true"/>
-    
+
+    <!-- If true, will remove the generated scripts from temp folder -->
+    <add key ="RemoveTempScripts" value="false"/>
+
     <!-- Comma seperated list of SQL Compact tables to ignore during migration -->
     <add key ="SqlCeTablesToIgnore" value="__MigrationHistory"/>
 
@@ -25,6 +28,7 @@ Configured via the App.Config file:
     <add key ="SqlCeTablesToAppend" value=""/>
 
     <!-- Comma seperated list of SQL Server tables to clear (DELETE), in that order -->
+    <!-- Only applicable if Scope = 0 -->    
     <add key ="SqlServerTablesToClear" value=""/>
     
   </appSettings>
