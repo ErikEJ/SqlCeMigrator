@@ -1,11 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.IO;
 using System.Linq;
 using System.Text;
 
 using ErikEJ.SqlCeScripting;
-using System.Collections.Generic;
 
 namespace ErikEJ.SqlCeMigrator
 {
@@ -42,7 +42,10 @@ namespace ErikEJ.SqlCeMigrator
                 return false;
             }
 
-            ClearTargetTables(targetConnectionString, tablesToClear, localDbPath);
+            if (scope == Scope.DataOnlyForSqlServer)
+            {
+                ClearTargetTables(targetConnectionString, tablesToClear, localDbPath);
+            }
 
             // Ignore the tables that should be ignored AND that we will be appending to later
             tablesToIgnore.Union(tablesToAppend);
