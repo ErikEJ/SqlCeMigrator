@@ -57,6 +57,7 @@ namespace ErikEJ.SqlCeMigrator
             }
 
             if (renameSource) RenameLocalDb(localDbPath);
+            Console.WriteLine($"{DateTime.Now.ToLongTimeString()}: Done");
             return true;
         }
 
@@ -79,8 +80,10 @@ namespace ErikEJ.SqlCeMigrator
                 {
                     generator.ExcludeTables(tablesToIgnoreOrAppend.ToList());
                 }
-
+                Console.WriteLine($"{DateTime.Now.ToLongTimeString()}: Scripting SQL Compact database");
                 generator.ScriptDatabaseToFile(scope);
+                Console.WriteLine($"{DateTime.Now.ToLongTimeString()}: Done scripting SQL Compact database");
+
                 using (var serverRepository = new ServerDBRepository4(targetConnectionString))
                 {
                     try
@@ -88,6 +91,7 @@ namespace ErikEJ.SqlCeMigrator
                         //Handles large exports also... 
                         if (File.Exists(tempScript)) // Single file
                         {
+                            Console.WriteLine($"{DateTime.Now.ToLongTimeString()}: Running script");
                             serverRepository.ExecuteSqlFile(tempScript);
                             if (removeTempFiles) TryDeleteFile(tempScript);
                         }
@@ -98,6 +102,7 @@ namespace ErikEJ.SqlCeMigrator
                                 var testFile = string.Format("{0}_{1}{2}", scriptRoot, i.ToString("D4"), ".sqltb");
                                 if (File.Exists(testFile))
                                 {
+                                    Console.WriteLine($"{DateTime.Now.ToLongTimeString()}: Running script");
                                     serverRepository.ExecuteSqlFile(testFile);
                                     if (removeTempFiles) TryDeleteFile(testFile);
                                 }
@@ -165,6 +170,8 @@ namespace ErikEJ.SqlCeMigrator
 
                     foreach (var table in tablesToClear)
                     {
+                        Console.WriteLine($"{DateTime.Now.ToLongTimeString()}: Clear SQL Server table: {table}");
+
                         using (var command = new SqlCommand(string.Format("DELETE FROM {0}", table), connection))
                         {
                             var result = command.ExecuteNonQuery();
