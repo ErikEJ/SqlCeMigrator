@@ -13,6 +13,9 @@ namespace ErikEJ.SqlCeMigrator
     {
         public bool TryImport(string localDbPath, List<string> tablesToIgnore, List<string> tablesToAppend, string targetConnectionString, List<string> tablesToClear, bool renameSource, bool removeTempFiles, int scopeValue)
         {
+            // Ignore the tables that should be ignored AND that we will be appending to later
+            tablesToIgnore = tablesToIgnore.Union(tablesToAppend).ToList();
+
             if (string.IsNullOrEmpty(localDbPath))
             {
                 throw new ArgumentNullException(nameof(localDbPath));
@@ -44,8 +47,6 @@ namespace ErikEJ.SqlCeMigrator
 
             ClearTargetTables(targetConnectionString, tablesToClear, localDbPath);
 
-            // Ignore the tables that should be ignored AND that we will be appending to later
-            tablesToIgnore.Union(tablesToAppend);
             RunMigration(localDbPath, tablesToIgnore, targetConnectionString, scope, removeTempFiles);
             
             if (scope == Scope.DataOnlyForSqlServer && tablesToAppend.Count > 0)
