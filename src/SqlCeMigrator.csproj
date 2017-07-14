@@ -33,19 +33,24 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="ISqlCeScripting, Version=3.5.2.15, Culture=neutral, PublicKeyToken=3681435cabd17ad2, processorArchitecture=MSIL">
-      <HintPath>packages\ErikEJ.SqlCeScripting.3.5.2.68\lib\net40\ISqlCeScripting.dll</HintPath>
+      <HintPath>packages\ErikEJ.SqlCeScripting.3.5.2.70\lib\net40\ISqlCeScripting.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="QuickGraph, Version=3.6.61114.0, Culture=neutral, PublicKeyToken=f3fb40175eec2af3, processorArchitecture=MSIL">
-      <HintPath>packages\ErikEJ.SqlCeScripting.3.5.2.68\lib\net40\QuickGraph.dll</HintPath>
+      <HintPath>packages\ErikEJ.SqlCeScripting.3.5.2.70\lib\net40\QuickGraph.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="QuickGraph.Data, Version=3.6.61114.0, Culture=neutral, PublicKeyToken=3681435cabd17ad2, processorArchitecture=MSIL">
-      <HintPath>packages\ErikEJ.SqlCeScripting.3.5.2.68\lib\net40\QuickGraph.Data.dll</HintPath>
+      <HintPath>packages\ErikEJ.SqlCeScripting.3.5.2.70\lib\net40\QuickGraph.Data.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="QuickGraph.Graphviz, Version=3.6.61114.0, Culture=neutral, PublicKeyToken=f3fb40175eec2af3, processorArchitecture=MSIL">
-      <HintPath>packages\ErikEJ.SqlCeScripting.3.5.2.68\lib\net40\QuickGraph.Graphviz.dll</HintPath>
+      <HintPath>packages\ErikEJ.SqlCeScripting.3.5.2.70\lib\net40\QuickGraph.Graphviz.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="SqlCeScripting40, Version=3.5.2.15, Culture=neutral, PublicKeyToken=f411b7eab4d5c1c5, processorArchitecture=MSIL">
-      <HintPath>packages\ErikEJ.SqlCeScripting.3.5.2.68\lib\net40\SqlCeScripting40.dll</HintPath>
+      <HintPath>packages\ErikEJ.SqlCeScripting.3.5.2.70\lib\net40\SqlCeScripting40.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.configuration" />
